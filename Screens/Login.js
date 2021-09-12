@@ -15,6 +15,10 @@ export default function Login({navigation}) {
     })
   }
 
+  const cadastrar = () => {
+    navigation.navigate("Cadastro")
+  }
+
   return (
     <View style={styles.container}>
       <Text h1>Market List</Text>
@@ -35,7 +39,14 @@ export default function Login({navigation}) {
 
       <Button
         title="Entrar"
+        buttonStyle={styles.button}
         onPress={() => entrar()}
+      />
+
+      <Button
+        title="Cadastrar-se"
+        buttonStyle={styles.button}
+        onPress={() => cadastrar()}
       />
 
     </View>

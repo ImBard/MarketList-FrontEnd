@@ -6,5 +6,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  button: {
+    width: "100%",
+    marginTop: 10
+  },
   });
 export default styles
