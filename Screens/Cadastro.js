@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { View} from 'react-native';
+import { KeyboardAvoidingView, Platform, View} from 'react-native';
 import {Picker} from '@react-native-picker/picker';
 import { Button, CheckBox, Input, Text } from 'react-native-elements';
 import styles from '../Styles/MainStyle';
+import { TextInputMask } from 'react-native-masked-text';
+import { ScrollView } from 'react-native-gesture-handler';
 
 export default function Cadastro({navigation}) {
 
@@ -19,6 +21,9 @@ export default function Cadastro({navigation}) {
   const [errorTelefone, setErrorTelefone] = useState(null)
   const [errorPassword, setErrorPassword] = useState(null)
 
+  let cpfField = null
+  let telefoneField = null
+
   const validar = () => {
     let error = false
     setErrorNome(null)
@@ -26,19 +31,20 @@ export default function Cadastro({navigation}) {
     setErrorCpf(null)
     setErrorTelefone(null)
     setErrorPassword(null)
-    if (!nome == null) {
+    if (nome == null) {
         setErrorNome("Preencha o seu nome completo")
         error = true
     }
-    if (email == null){
+    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if (!re.test(String(email).toLowerCase())){
         setErrorEmail("Preencha o E-mail corretamente")
         error = true
     }
-    if (cpf == null){
-        setErrorCpf("Preencha o CPF corretamente")
+    if (!cpfField.isValid()){
+        setErrorCpf("Preencha seu CPF corretamente")
         error = true
     }
-    if (telefone == null){
+    if (!telefoneField.isValid()){
         setErrorTelefone("Preencha o Telefone corretamente")
         error = true
     }
@@ -58,66 +64,90 @@ export default function Cadastro({navigation}) {
 
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView 
+    behavior={Platform.OS == "ios" ? "padding" : "height"}
+    style={styles.container}
+    keyboardVerticalOffset={80}
+    >
+      <ScrollView style={styles.scrollView}>  
       <Text h1>Cadastre-se</Text>
       
       <Input
         placeholder="Nome"
         onChangeText={value => {
-            setNome(value)
-            setErrorNome(null)}}
-        returnKeyType="done"
-        errorMessage={errorNome}
-        />
+          setNome(value)
+          setErrorNome(null)}}
+          returnKeyType="done"
+          errorMessage={errorNome}
+          />
 
       <Input
         placeholder="E-mail"
         keyboardType="email-address"
         onChangeText={value => {
-            setEmail(value)
-            setErrorEmail(null)}}
-        returnKeyType="done"
-        errorMessage={errorEmail}
-        />
+          setEmail(value)
+          setErrorEmail(null)}}
+          returnKeyType="done"
+          errorMessage={errorEmail}
+          />
 
-      <Input
+      <View style={styles.containerMask}>
+        <TextInputMask 
         placeholder="CPF"
-        keyboardType="numeric"
+        type="cpf"
+        value={cpf}
         onChangeText={value => {
-            setCpf(value)
-            setErrorCpf(null)}}
+          setCpf(value)
+          setErrorCpf(null)
+        }}
+        keyboardType="numeric"
         returnKeyType="done"
-        errorMessage={errorCpf}
+        style={styles.maskedInput}
+        ref={(ref) => cpfField = ref}
         />
+      </View>
+      <Text style={styles.errorMessage}>{errorCpf}</Text>
 
-      <Input
+      <View style={styles.containerMask}>
+        <TextInputMask 
         placeholder="Telefone"
-        keyboardType="numeric"
+        type={'cel-phone'}
+        options={{
+          maskType: 'BRL',
+          withDDD: true,
+          dddMask: '(99) '
+        }}
+        value={telefone}
         onChangeText={value => {
-            setTelefone(value)
-            setErrorTelefone(null)}}
+          setTelefone(value)
+          setErrorTelefone(null)
+        }}
+        keyboardType="numeric"
         returnKeyType="done"
-        errorMessage={errorTelefone}
+        style={styles.maskedInput}
+        ref={(ref) => telefoneField = ref}
         />
+      </View>
+      <Text style={styles.errorMessage}>{errorTelefone}</Text>
 
        {/* <Picker
         selectedValue={selectedLanguage}
         onValueChange={(itemValue, itemIndex) =>
-            setSelectedLanguage(itemValue)
+          setSelectedLanguage(itemValue)
         }>
         <Picker.Item label="Java" value="java" />
         <Picker.Item label="JavaScript" value="js" />
-        </Picker>  */}
+      </Picker>  */}
 
       <Input
         placeholder="Sua senha"
         secureTextEntry={true}
         onChangeText={value => {
-            setPassword(value)
-            setErrorPassword(null)}}
-        returnKeyType="done"
-        errorMessage={errorPassword}
-        />
+          setPassword(value)
+          setErrorPassword(null)}}
+          returnKeyType="done"
+          errorMessage={errorPassword}
+          />
 
       <CheckBox 
         title="Aceito os termos de politica e privacidade"
@@ -127,14 +157,15 @@ export default function Cadastro({navigation}) {
         uncheckedColor="red"
         checked={isSelected}
         onPress={() => setSelected(!isSelected)}
-      />
+        />
 
       <Button
         title="Criar"
         buttonStyle={styles.button}
         onPress={() => criar()}
-      />
+        />
 
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
