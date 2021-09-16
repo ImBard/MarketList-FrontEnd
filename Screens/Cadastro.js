@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, View} from 'react-native';
-import {Picker} from '@react-native-picker/picker';
 import { Button, CheckBox, Input, Text } from 'react-native-elements';
 import styles from '../Styles/MainStyle';
 import { TextInputMask } from 'react-native-masked-text';
 import { ScrollView } from 'react-native-gesture-handler';
+import userService from '../Services/UserService';
 
 export default function Cadastro({navigation}) {
 
@@ -20,7 +20,7 @@ export default function Cadastro({navigation}) {
   const [errorCpf, setErrorCpf] = useState(null)
   const [errorTelefone, setErrorTelefone] = useState(null)
   const [errorPassword, setErrorPassword] = useState(null)
-
+  const [isLoading, setLoading] = useState(false)
   let cpfField = null
   let telefoneField = null
 
@@ -57,7 +57,26 @@ export default function Cadastro({navigation}) {
 
   const criar = () => {
       if(validar()){
-          console.log("Conta criada!!!")
+          setLoading(true)
+
+          let data = {
+            nome: nome,
+            email: email,
+            cpf: cpf,
+            telefone: telefone,
+            password: password
+          }
+          userService.Cadastrar(data)
+          .then((response) => {
+            setLoading(false)
+            console.log(response.data)
+          })
+          .catch((error) => {
+            setLoading(false)
+            console.log(error)
+            console.log("Deu erro!!!")
+          })
+
         }
     }
 //   const [selectedLanguage, setSelectedLanguage] = useState();
@@ -89,7 +108,7 @@ export default function Cadastro({navigation}) {
           setErrorEmail(null)}}
           returnKeyType="done"
           errorMessage={errorEmail}
-          />
+      />
 
       <View style={styles.containerMask}>
         <TextInputMask 
@@ -104,7 +123,7 @@ export default function Cadastro({navigation}) {
         returnKeyType="done"
         style={styles.maskedInput}
         ref={(ref) => cpfField = ref}
-        />
+      />
       </View>
       <Text style={styles.errorMessage}>{errorCpf}</Text>
 
@@ -126,18 +145,9 @@ export default function Cadastro({navigation}) {
         returnKeyType="done"
         style={styles.maskedInput}
         ref={(ref) => telefoneField = ref}
-        />
+      />
       </View>
       <Text style={styles.errorMessage}>{errorTelefone}</Text>
-
-       {/* <Picker
-        selectedValue={selectedLanguage}
-        onValueChange={(itemValue, itemIndex) =>
-          setSelectedLanguage(itemValue)
-        }>
-        <Picker.Item label="Java" value="java" />
-        <Picker.Item label="JavaScript" value="js" />
-      </Picker>  */}
 
       <Input
         placeholder="Sua senha"
@@ -147,7 +157,7 @@ export default function Cadastro({navigation}) {
           setErrorPassword(null)}}
           returnKeyType="done"
           errorMessage={errorPassword}
-          />
+      />
 
       <CheckBox 
         title="Aceito os termos de politica e privacidade"
@@ -157,13 +167,19 @@ export default function Cadastro({navigation}) {
         uncheckedColor="red"
         checked={isSelected}
         onPress={() => setSelected(!isSelected)}
-        />
+      />
 
+      {isLoading &&
+        <Text>Carregando...</Text>
+      }
+      { !isLoading &&
       <Button
         title="Criar"
         buttonStyle={styles.button}
         onPress={() => criar()}
-        />
+      />
+      }
+
 
       </ScrollView>
     </KeyboardAvoidingView>
